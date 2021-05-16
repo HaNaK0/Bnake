@@ -32,6 +32,13 @@ struct Materials {
 
 fn main() {
     App::build()
+        .insert_resource(WindowDescriptor {
+            title: "Bnake!".to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..Default::default()
+        })
+        .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
         .add_startup_system(setup.system())
         .add_startup_stage("game_setup", SystemStage::single(spawn_snake.system()))
         .add_system(snake_movement.system().label("input"))
@@ -70,16 +77,16 @@ fn snake_movement(
     mut head_positions: Query<&mut Position, With<SnakeHead>>,
 ) {
     for mut position in head_positions.iter_mut() {
-        if keyboard_input.pressed(KeyCode::Left) {
+        if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
             position.x -= 1;
         }
-        if keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
             position.x += 1;
         }
-        if keyboard_input.pressed(KeyCode::Up) {
+        if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
             position.y += 1;
         }
-        if keyboard_input.pressed(KeyCode::Down) {
+        if keyboard_input.pressed(KeyCode::Down)|| keyboard_input.pressed(KeyCode::S) {
             position.y -= 1;
         }
     }
