@@ -1,6 +1,6 @@
 use core::f32;
 
-use bevy::{prelude::*};
+use bevy::prelude::*;
 
 const ARENA_WIDTH: u32 = 10;
 const ARENA_HEIGHT: u32 = 10;
@@ -26,8 +26,8 @@ impl Size {
 }
 
 struct SnakeHead;
-struct Materials{
-    head_material: Handle<ColorMaterial>
+struct Materials {
+    head_material: Handle<ColorMaterial>,
 }
 
 fn main() {
@@ -36,19 +36,16 @@ fn main() {
         .add_startup_stage("game_setup", SystemStage::single(spawn_snake.system()))
         .add_system(snake_movement.system().label("input"))
         .add_system_set_to_stage(
-            CoreStage::PostUpdate, 
+            CoreStage::PostUpdate,
             SystemSet::new()
                 .with_system(size_scaling.system())
                 .with_system(position_translation.system()),
         )
         .add_plugins(DefaultPlugins)
-        .run();   
+        .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>
-) {
+fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     info!("Hello World!");
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.insert_resource(Materials {
@@ -56,10 +53,7 @@ fn setup(
     })
 }
 
-fn spawn_snake(
-    mut commands: Commands,
-    materials: Res<Materials>,
-) {
+fn spawn_snake(mut commands: Commands, materials: Res<Materials>) {
     commands
         .spawn_bundle(SpriteBundle {
             material: materials.head_material.clone(),
@@ -67,57 +61,51 @@ fn spawn_snake(
             ..Default::default()
         })
         .insert(SnakeHead)
-        .insert(Position{x: 0, y: 0})
+        .insert(Position { x: 0, y: 0 })
         .insert(Size::square(0.8));
 }
 
 fn snake_movement(
     keyboard_input: Res<Input<KeyCode>>,
-    mut head_positions: Query<&mut Transform, With<SnakeHead>>,
+    mut head_positions: Query<&mut Position, With<SnakeHead>>,
 ) {
-    for mut transform in head_positions.iter_mut() {
+    for mut position in head_positions.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
-            transform.translation.x -= 2.;
+            position.x -= 1;
         }
         if keyboard_input.pressed(KeyCode::Right) {
-            transform.translation.x += 2.;
+            position.x += 1;
         }
-        if keyboard_input.pressed(KeyCode::Up){
-            transform.translation.y += 2.;
+        if keyboard_input.pressed(KeyCode::Up) {
+            position.y += 1;
         }
         if keyboard_input.pressed(KeyCode::Down) {
-            transform.translation.y -= 2.;
+            position.y -= 1;
         }
     }
 }
 
-fn size_scaling(
-    windows: Res<Windows>, 
-    mut q: Query<(&Size, &mut Sprite)>
-) {
+fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Sprite)>) {
     let window = windows.get_primary().unwrap();
     for (sprite_size, mut sprite) in q.iter_mut() {
         sprite.size = Vec2::new(
-            sprite_size.width / ARENA_WIDTH as f32 * window.width(), 
+            sprite_size.width / ARENA_WIDTH as f32 * window.width(),
             sprite_size.height / ARENA_HEIGHT as f32 * window.height(),
         )
     }
 }
 
-fn position_translation(
-    windows: Res<Windows>,
-    mut q: Query<(&Position, &mut Transform)>,
-) {
+fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Transform)>) {
     fn convert(pos: f32, bound_window: f32, bound_game: f32) -> f32 {
         let tile_size = bound_window / bound_game;
-        pos / bound_game - (bound_window / 2.) + (tile_size / 2.)
+        pos / bound_game * bound_window - (bound_window / 2.) + (tile_size / 2.)
     }
     let window = windows.get_primary().unwrap();
     for (pos, mut transform) in q.iter_mut() {
         transform.translation = Vec3::new(
-            convert(pos.x as f32, window.width() as f32, ARENA_WIDTH as f32), 
-            convert(pos.y as f32, window.height() as f32, ARENA_HEIGHT as f32), 
-            0.0
-        )
+            convert(pos.x as f32, window.width() as f32, ARENA_WIDTH as f32),
+            convert(pos.y as f32, window.height() as f32, ARENA_HEIGHT as f32),
+            0.0,
+        );
     }
 }
