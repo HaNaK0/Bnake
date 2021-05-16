@@ -1,2 +1,2 @@
 # Bnake
-Snake game written in Rust using Bevy
+Snake clone written in Rust using Bevy following https://mbuffett.com/posts/bevy-snake-tutorial/
