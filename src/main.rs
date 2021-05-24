@@ -1,5 +1,5 @@
+use bevy::{core::FixedTimestep, prelude::*};
 use rand::prelude::random;
-use bevy::{prelude::*, core::FixedTimestep};
 
 const ARENA_WIDTH: u32 = 10;
 const ARENA_HEIGHT: u32 = 10;
@@ -73,15 +73,16 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
         .add_startup_system(setup.system())
         .add_startup_stage("game_setup", SystemStage::single(spawn_snake.system()))
-        .add_system(snake_movement_input
-            .system()
-            .label(SnakeMovement::Input)
-            .before(SnakeMovement::Movement)
+        .add_system(
+            snake_movement_input
+                .system()
+                .label(SnakeMovement::Input)
+                .before(SnakeMovement::Movement),
         )
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.150))
-                .with_system(snake_movement.system().label(SnakeMovement::Movement))
+                .with_system(snake_movement.system().label(SnakeMovement::Movement)),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
@@ -92,7 +93,7 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(1.0))
-                .with_system(food_spawner.system())
+                .with_system(food_spawner.system()),
         )
         .add_plugins(DefaultPlugins)
         .run();
@@ -114,16 +115,14 @@ fn spawn_snake(mut commands: Commands, materials: Res<Materials>) {
             sprite: Sprite::new(Vec2::new(10.0, 10.0)),
             ..Default::default()
         })
-        .insert(SnakeHead{
-            direction: Direction::Up,            
+        .insert(SnakeHead {
+            direction: Direction::Up,
         })
         .insert(Position { x: 0, y: 0 })
         .insert(Size::square(0.8));
 }
 
-fn snake_movement(
-    mut heads: Query<(&mut Position, &SnakeHead)>,
-) {
+fn snake_movement(mut heads: Query<(&mut Position, &SnakeHead)>) {
     if let Ok((mut head_pos, head)) = heads.single_mut() {
         match head.direction {
             Direction::Left => {
@@ -144,14 +143,13 @@ fn snake_movement(
 
 fn snake_movement_input(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut SnakeHead>) {
     if let Some(mut head) = heads.iter_mut().next() {
-
         let dir: Direction = if keyboard_input.pressed(KeyCode::Left) {
             Direction::Left
-        } else if keyboard_input.pressed(KeyCode::Up){
+        } else if keyboard_input.pressed(KeyCode::Up) {
             Direction::Up
         } else if keyboard_input.pressed(KeyCode::Right) {
             Direction::Right
-        } else if keyboard_input.pressed(KeyCode::Down){
+        } else if keyboard_input.pressed(KeyCode::Down) {
             Direction::Down
         } else {
             head.direction
@@ -188,15 +186,12 @@ fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Tra
     }
 }
 
-fn food_spawner(
-    mut commands: Commands, 
-    materials: Res<Materials>
-) {
+fn food_spawner(mut commands: Commands, materials: Res<Materials>) {
     commands
         .spawn_bundle(SpriteBundle {
             material: materials.food_material.clone(),
-            ..Default::default()}
-        )
+            ..Default::default()
+        })
         .insert(Food)
         .insert(Position {
             x: (random::<f32>() * ARENA_WIDTH as f32) as i32,
