@@ -3,9 +3,24 @@ name = "bnake"
 version = "0.1.0"
 authors = ["HaNaK0 <hampus@hampushuledal.com>"]
 edition = "2018"
+resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+crate_type = ["cdylib", "rlib"]
+
+#Dependecies for all platforms
 [dependencies]
-bevy = {version = "0.5"}
-rand = "0.7.3"
+rand = "0.8"
+getrandom = { version = "0.2", features = ["wasm-bindgen"] }
+wasm-bindgen = "0.2"
+
+# Dependencies for not wasm
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+bevy = {version = "0.5", default-features = false, features = ["bevy_wgpu", "bevy_winit", "render", "x11"]}
+
+# Dependencies for WASM only.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = {version = "0.5", default-features = false, features = ["bevy_winit", "render"]}
+bevy_webgl2 = "0.5"
